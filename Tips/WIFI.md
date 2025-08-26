@@ -28,7 +28,7 @@ network={
 
 ## 2. 创建主连接脚本（带重连功能）
 ```
-vim /usr/bin/wifi_connect.sh
+vim ~/bin/wifi_connect.sh
 ```
 ```bash
 #!/bin/sh
@@ -101,13 +101,13 @@ connect_wifi
 log "=== WiFi connection process finished ==="
 ```
 ```
-chmod +x /usr/bin/wifi_connect.sh
+chmod +x ~/bin/wifi_connect.sh
 ```
 
 
 ## 3. 掉线监控脚本
 ```shell
-vim /usr/bin/wifi_monitor.sh
+vim ~/bin/wifi_monitor.sh
 ```
 ```bash
 #!/bin/sh
@@ -129,26 +129,26 @@ check_connection() {
     fi
     
     # 方法2: 检查wpa_supplicant进程
-    if ! ps | grep -q "[w]pa_supplicant.*wlan0"; then
-        log "wpa_supplicant process not found"
-        return 1
-    fi
+    # if ! ps | grep -q "[w]pa_supplicant.*wlan0"; then
+    #     log "wpa_supplicant process not found"
+    #     return 1
+    # fi
     
     # 方法3: 可选的心跳检测（ping网关或DNS）
     # 先获取网关地址
-    GATEWAY=$(route -n | grep 'wlan0' | grep 'UG' | awk '{print $2}' | head -1)
-    if [ -n "$GATEWAY" ]; then
-        if ! ping -c 2 -W 3 -I wlan0 $GATEWAY >/dev/null 2>&1; then
-            log "Cannot ping gateway $GATEWAY - connection issue"
-            return 1
-        fi
-    else
-        # 如果没有网关，尝试ping公共DNS
-        if ! ping -c 2 -W 3 -I wlan0 8.8.8.8 >/dev/null 2>&1; then
-            log "Cannot ping external host - connection issue"
-            return 1
-        fi
-    fi
+    # GATEWAY=$(route -n | grep 'wlan0' | grep 'UG' | awk '{print $2}' | head -1)
+    # if [ -n "$GATEWAY" ]; then
+    #     if ! ping -c 2 -W 3 -I wlan0 $GATEWAY >/dev/null 2>&1; then
+    #         log "Cannot ping gateway $GATEWAY - connection issue"
+    #         return 1
+    #     fi
+    # else
+    #     # 如果没有网关，尝试ping公共DNS
+    #     if ! ping -c 2 -W 3 -I wlan0 8.8.8.8 >/dev/null 2>&1; then
+    #         log "Cannot ping external host - connection issue"
+    #         return 1
+    #     fi
+    # fi
     
     return 0 # 连接正常
 }
@@ -181,7 +181,7 @@ while true; do
 done
 ```
 ```
-chmod +x /usr/bin/wifi_monitor.sh
+chmod +x ~/bin/wifi_monitor.sh
 ```
 
 
@@ -198,13 +198,13 @@ case "$1" in
     start)
         echo "Starting WiFi connection and monitor..."
         # 启动连接脚本
-        /usr/bin/wifi_connect.sh > /tmp/wifi_start.log 2>&1 &
+        /root/bin/wifi_connect.sh > /tmp/wifi_start.log 2>&1 &
         
         # 等待连接完成
         sleep 15
         
         # 启动监控脚本
-        /usr/bin/wifi_monitor.sh > /tmp/wifi_monitor_start.log 2>&1 &
+        /root/bin/wifi_monitor.sh > /tmp/wifi_monitor_start.log 2>&1 &
         ;;
         
     stop)
