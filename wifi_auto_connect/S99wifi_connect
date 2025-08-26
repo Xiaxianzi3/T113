@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# WiFi自动连接启动脚本（包含监控）
+
+case "$1" in
+    start)
+        echo "Starting WiFi connection and monitor..."
+        # 启动连接脚本
+        /usr/bin/wifi_connect.sh > /tmp/wifi_start.log 2>&1 &
+        
+        # 等待连接完成
+        sleep 15
+        
+        # 启动监控脚本
+        /usr/bin/wifi_monitor.sh > /tmp/wifi_monitor_start.log 2>&1 &
+        ;;
+        
+    stop)
+        echo "Stopping WiFi connection and monitor..."
+        # 停止监控脚本
+        killall wifi_monitor.sh 2>/dev/null
+        
+        # 停止连接进程
+        killall wpa_supplicant 2>/dev/null
+        killall udhcpc 2>/dev/null
+        ifconfig wlan0 down 2>/dev/null
+        
+        # 确保所有相关进程都停止
+        sleep 2
+        ;;
+        
+    restart)
+        echo "Restarting WiFi connection..."
+        $0 stop
+        sleep 5
+        $0 start
+        ;;
+        
+    status)
+        echo "=== WiFi Connection Status ==="
+        echo "Monitor process: $(ps | grep '[w]ifi_monitor.sh' | wc -l) running"
+        echo "wpa_supplicant: $(ps | grep '[w]pa_supplicant' | wc -l) running"
+        echo "udhcpc: $(ps | grep '[u]dhcpc' | wc -l) running"
+        echo ""
+        echo "Interface status:"
+        ifconfig wlan0 2>/dev/null | grep -E "(inet addr|UP)"
+        echo ""
+        echo "Connection status:"
+        iwconfig wlan0 2>/dev/null | grep "ESSID"
+        ;;
+        
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
